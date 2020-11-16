@@ -80,12 +80,29 @@ namespace Smoothing
                     ? LinearApproximation.Evaluate(x, y)
                     : ParabolicApproximation.Evaluate(x, y);
                 answer.Text = result.ToString();
+                CheckAnswer(x, y, result);
             }
             catch (FormatException)
             {
                 MessageBox.Show("Неккоретные вводные данные! Должны быть только действительные числа",
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+
+        private static void CheckAnswer(double[] x, double[] y, Polynomial polynomial)
+        {
+            var builder = new StringBuilder();
+            builder.Append("x\ty\ty(x)\t(y-y(x))\u00B2\n\n");
+            var yX = x.Select(polynomial.Evaluate).ToArray();
+            var error = yX.Zip(y ,(yX, y) => (y - yX) * (y - yX)).ToArray();
+            for (int i = 0; i < x.Length; i++)
+            {
+                builder.Append($"{x[i]}\t{y[i]}\t{yX[i]:F}\t{error[i]:G1}\n");
+            }
+
+            builder.Append($"\t \tSum:\t{error.Sum():G1}");
+            MessageBox.Show(builder.ToString(), "Погрешности", MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
     }
 }
